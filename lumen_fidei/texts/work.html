@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work — Lumen Fidei</title>
+<meta name="description" content="Read a public-domain theological work. Bookmark your place and highlight passages.">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .work-app {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: calc(100vh - 140px);
+  }
+  @media (max-width: 860px) {
+    .work-app { grid-template-columns: 1fr; }
+    .work-side { display: none; }
+    .work-side.open {
+      display: block; position: fixed; inset: 0; z-index: 90;
+      background: var(--bg-deep); overflow-y: auto; padding: 1.25rem;
+    }
+  }
+  .work-side {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    padding: 1.1rem 0.9rem 2rem;
+    position: sticky;
+    top: 70px;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+  .work-side h3 {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+    margin: 1rem 0 0.5rem;
+  }
+  .work-side h3:first-child { margin-top: 0.2rem; }
+  .work-side a.ch-link {
+    display: block;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.4rem;
+    border-radius: 3px;
+  }
+  .work-side a.ch-link:hover,
+  .work-side a.ch-link.is-active { color: var(--gold-glow); background: rgba(201,162,39,0.08); }
+
+  .work-main { padding: 1.5rem 1.75rem 4rem; max-width: 720px; }
+  @media (max-width: 860px) { .work-main { padding: 1rem 1.1rem 3rem; } }
+
+  .work-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.9rem;
+    border-bottom: 1px solid var(--hairline);
+    position: sticky;
+    top: 70px;
+    z-index: 5;
+    background: var(--bg);
+  }
+  .work-toolbar button {
+    font-family: var(--serif-body);
+    font-size: 0.88rem;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.4rem 0.75rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .work-toolbar button:hover,
+  .work-toolbar button.is-on {
+    border-color: var(--gold);
+    color: var(--gold-glow);
+  }
+  .work-toolbar .status {
+    margin-left: auto;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+  }
+
+  .work-meta .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-glow);
+  }
+  .work-meta h1 {
+    margin: 0.35rem 0 0.4rem;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    line-height: 1.2;
+  }
+  .work-meta .sub {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .chapter-block {
+    margin-bottom: 2.4rem;
+    scroll-margin-top: 130px;
+  }
+  .chapter-block h2 {
+    font-size: 1.15rem;
+    margin: 0 0 0.9rem;
+    color: var(--gold-glow);
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 0.4rem;
+  }
+  .chapter-block p {
+    margin: 0 0 0.9rem;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+  .chapter-block p.hl-selectable {
+    cursor: text;
+  }
+
+  mark.user-hl {
+    background: rgba(201,162,39,0.28);
+    color: inherit;
+    border-radius: 2px;
+    padding: 0 0.05em;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .bookmark-marker {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    position: relative;
+  }
+  .bookmark-marker::before {
+    content: '🔖';
+    position: absolute;
+    left: -1.4rem;
+    top: -0.1rem;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  .hl-popup {
+    position: fixed;
+    z-index: 100;
+    display: none;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  .hl-popup.is-visible { display: flex; }
+  .hl-popup button {
+    font-family: var(--serif-body);
+    font-size: 0.82rem;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--hairline);
+    padding: 0.35rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  .hl-popup button:hover { border-color: var(--gold); color: var(--gold-glow); }
+
+  .source-footer {
+    margin-top: 2.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px dashed var(--hairline);
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    line-height: 1.55;
+  }
+  .missing { color: var(--ink-dim); padding: 2rem 0; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="../index.html" class="wordmark">LUMEN&nbsp;FIDEI</a>
+  <nav>
+    <a href="../figures.html">Figures</a>
+    <a href="../concepts.html">Concepts</a>
+    <a href="../theological-tree.html">Theological Tree</a>
+    <a href="bible.html">Sacred Texts</a>
+    <a href="../about.html">About</a>
+  </nav>
+</header>
+
+<div class="work-app">
+  <aside class="work-side" id="work-side">
+    <h3>Chapters</h3>
+    <div id="work-toc"></div>
+    <h3>Reading tools</h3>
+    <p style="font-size:0.82rem;color:var(--ink-dim);line-height:1.45;margin:0.3rem 0.4rem 0;">
+      Bookmark saves your scroll position. Select text to highlight. Stored only in this browser.
+    </p>
+  </aside>
+
+  <main class="work-main">
+    <div class="work-toolbar">
+      <button type="button" id="btn-side" class="mobile-only">Contents</button>
+      <button type="button" id="btn-bookmark" title="Save place in this work">Bookmark place</button>
+      <button type="button" id="btn-goto-bookmark" title="Jump to saved bookmark">Go to bookmark</button>
+      <button type="button" id="btn-clear-hl" title="Clear highlights in this work">Clear highlights</button>
+      <span class="status" id="tool-status"></span>
+    </div>
+    <div id="work-root">
+      <p class="missing">Loading…</p>
+    </div>
+  </main>
+</div>
+
+<div class="hl-popup" id="hl-popup" role="toolbar" aria-label="Highlight selection">
+  <button type="button" id="btn-hl">Highlight</button>
+  <button type="button" id="btn-hl-clear-sel">Clear mark</button>
+</div>
+
+<script src="../js/works.js"></script>
+<script>
+(function () {
+  function qs(name) {
+    const m = new URLSearchParams(window.location.search).get(name);
+    if (m) return m;
+    // support hash #workKey or #workKey/ch-0
+    const raw = (window.location.hash || '').replace(/^#/, '');
+    if (!raw) return null;
+    return raw.split('/')[0] || null;
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function storageKey(workId, kind) {
+    return 'lumen_fidei_' + kind + '_' + workId;
+  }
+
+  function loadJSON(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      return fallback;
+    }
+  }
+
+  function saveJSON(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) { /* quota / private mode */ }
+  }
+
+  function flash(msg) {
+    const el = document.getElementById('tool-status');
+    if (!el) return;
+    el.textContent = msg;
+    clearTimeout(flash._t);
+    flash._t = setTimeout(function () { el.textContent = ''; }, 2800);
+  }
+
+  let currentWorkId = null;
+
+  function render() {
+    const id = qs('id');
+    const root = document.getElementById('work-root');
+    const tocEl = document.getElementById('work-toc');
+    currentWorkId = id;
+
+    if (!id || !window.WORKS || !window.WORKS[id]) {
+      const available = window.WORKS ? Object.keys(window.WORKS).slice(0, 12).join(', ') + '…' : '(works failed to load)';
+      root.innerHTML =
+        '<div class="missing"><h1>Work not found</h1><p>No text is loaded for <code>' +
+        escapeHtml(id || '') + '</code>.</p><p>Available keys include: ' + escapeHtml(available) +
+        '</p><p><a href="../figures.html">Back to Figures</a></p></div>';
+      tocEl.innerHTML = '';
+      document.title = 'Work not found — Lumen Fidei';
+      return;
+    }
+
+    const w = window.WORKS[id];
+    document.title = (w.title || id) + ' — Lumen Fidei';
+
+    // TOC
+    tocEl.innerHTML = (w.chapters || []).map(function (ch, i) {
+      const label = ch.heading || ('Chapter ' + (i + 1));
+      return '<a class="ch-link" href="#ch-' + i + '" data-ch="' + i + '">' + escapeHtml(label) + '</a>';
+    }).join('') || '<span style="color:var(--ink-dim);font-size:0.85rem;padding:0.3rem">No chapters</span>';
+
+    let body = '';
+    body += '<div class="work-meta">';
+    body += '<span class="eyebrow">' + escapeHtml(w.author || '') + '</span>';
+    body += '<h1>' + escapeHtml(w.title) + '</h1>';
+    body += '<div class="sub">' + escapeHtml(w.translation || 'Public domain translation') + '</div>';
+    body += '</div>';
+
+    (w.chapters || []).forEach(function (ch, i) {
+      body += '<section class="chapter-block" id="ch-' + i + '">';
+      if (ch.heading) body += '<h2>' + escapeHtml(ch.heading) + '</h2>';
+      (ch.paragraphs || []).forEach(function (para, pi) {
+        body += '<p class="hl-selectable" data-ch="' + i + '" data-p="' + pi + '" id="p-' + i + '-' + pi + '">' +
+          escapeHtml(para) + '</p>';
+      });
+      body += '</section>';
+    });
+
+    body += '<p class="source-footer">';
+    body += escapeHtml(w.note || 'This text is in the public domain and is hosted on Lumen Fidei for reading without leaving the site.');
+    body += ' · <a href="../figures.html">Figures</a>';
+    body += ' · Bookmarks &amp; highlights stay in this browser only.';
+    body += '</p>';
+
+    root.innerHTML = body;
+
+    // Chapter nav smooth scroll
+    tocEl.querySelectorAll('.ch-link').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        const el = document.getElementById('ch-' + a.getAttribute('data-ch'));
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('work-side').classList.remove('open');
+      });
+    });
+
+    applyHighlights(id);
+    applyBookmarkMarker(id);
+
+    // Restore scroll from ?bookmark=1 or hash chapter
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('resume') === '1') {
+      restoreBookmark(id, true);
+    } else {
+      const hash = (window.location.hash || '').replace(/^#/, '');
+      if (hash && hash.indexOf('ch-') === 0) {
+        const target = document.getElementById(hash);
+        if (target) requestAnimationFrame(function () {
+          target.scrollIntoView({ block: 'start' });
+        });
+      }
+    }
+  }
+
+  /* ---------- Highlights ---------- */
+  function applyHighlights(workId) {
+    const map = loadJSON(storageKey(workId, 'hl'), {});
+    Object.keys(map).forEach(function (pid) {
+      const el = document.getElementById(pid);
+      if (!el) return;
+      const ranges = map[pid];
+      if (!ranges || !ranges.length) return;
+      // Apply by wrapping full paragraph if stored as full, else approximate by text snippets
+      ranges.forEach(function (r) {
+        highlightInElement(el, r.text);
+      });
+    });
+  }
+
+  function highlightInElement(el, snippet) {
+    if (!snippet || !el) return;
+    const text = el.textContent;
+    const idx = text.indexOf(snippet);
+    if (idx < 0) {
+      // fallback: mark whole paragraph
+      if (!el.querySelector('mark.user-hl')) {
+        el.innerHTML = '<mark class="user-hl">' + escapeHtml(text) + '</mark>';
+      }
+      return;
+    }
+    const before = text.slice(0, idx);
+    const mid = text.slice(idx, idx + snippet.length);
+    const after = text.slice(idx + snippet.length);
+    el.innerHTML = escapeHtml(before) + '<mark class="user-hl">' + escapeHtml(mid) + '</mark>' + escapeHtml(after);
+  }
+
+  function saveHighlightFromSelection() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !currentWorkId) return;
+    const range = sel.getRangeAt(0);
+    const node = range.commonAncestorContainer;
+    const p = node.nodeType === 1 ? node.closest('p.hl-selectable') : node.parentElement && node.parentElement.closest('p.hl-selectable');
+    if (!p || !p.id) {
+      flash('Select text inside a paragraph');
+      return;
+    }
+    const snippet = sel.toString().trim();
+    if (snippet.length < 2) return;
+
+    const map = loadJSON(storageKey(currentWorkId, 'hl'), {});
+    if (!map[p.id]) map[p.id] = [];
+    // avoid dupes
+    if (!map[p.id].some(function (r) { return r.text === snippet; })) {
+      map[p.id].push({ text: snippet, t: Date.now() });
+    }
+    saveJSON(storageKey(currentWorkId, 'hl'), map);
+    highlightInElement(p, snippet);
+    sel.removeAllRanges();
+    hidePopup();
+    flash('Highlight saved');
+  }
+
+  function clearHighlightsInWork() {
+    if (!currentWorkId) return;
+    localStorage.removeItem(storageKey(currentWorkId, 'hl'));
+    // re-render body text without marks
+    render();
+    flash('Highlights cleared');
+  }
+
+  /* ---------- Bookmarks ---------- */
+  function saveBookmark() {
+    if (!currentWorkId) return;
+    // Find nearest paragraph in view
+    const paras = Array.prototype.slice.call(document.querySelectorAll('p.hl-selectable'));
+    let best = null;
+    let bestDist = Infinity;
+    const mid = window.innerHeight * 0.28;
+    paras.forEach(function (p) {
+      const r = p.getBoundingClientRect();
+      const dist = Math.abs(r.top - mid);
+      if (r.bottom > 80 && dist < bestDist) {
+        bestDist = dist;
+        best = p;
+      }
+    });
+    const data = {
+      scrollY: window.scrollY,
+      paragraphId: best ? best.id : null,
+      chapterId: best ? ('ch-' + best.getAttribute('data-ch')) : null,
+      t: Date.now()
+    };
+    saveJSON(storageKey(currentWorkId, 'bm'), data);
+    applyBookmarkMarker(currentWorkId);
+    flash('Bookmark saved' + (best ? ' near this passage' : ''));
+  }
+
+  function restoreBookmark(workId, silent) {
+    const data = loadJSON(storageKey(workId, 'bm'), null);
+    if (!data) {
+      if (!silent) flash('No bookmark for this work');
+      return;
+    }
+    if (data.paragraphId) {
+      const el = document.getElementById(data.paragraphId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (!silent) flash('Jumped to bookmark');
+        return;
+      }
+    }
+    if (typeof data.scrollY === 'number') {
+      window.scrollTo({ top: data.scrollY, behavior: 'smooth' });
+      if (!silent) flash('Jumped to bookmark');
+    }
+  }
+
+  function applyBookmarkMarker(workId) {
+    document.querySelectorAll('.bookmark-marker').forEach(function (m) { m.remove(); });
+    const data = loadJSON(storageKey(workId, 'bm'), null);
+    if (!data || !data.paragraphId) return;
+    const el = document.getElementById(data.paragraphId);
+    if (!el) return;
+    const mark = document.createElement('span');
+    mark.className = 'bookmark-marker';
+    mark.title = 'Your bookmark';
+    el.insertBefore(mark, el.firstChild);
+  }
+
+  /* ---------- Selection popup ---------- */
+  const popup = document.getElementById('hl-popup');
+  function hidePopup() {
+    popup.classList.remove('is-visible');
+  }
+  function showPopupNearSelection() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) { hidePopup(); return; }
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    if (!rect || (rect.width === 0 && rect.height === 0)) { hidePopup(); return; }
+    popup.style.left = Math.min(window.innerWidth - 160, Math.max(8, rect.left + rect.width / 2 - 70)) + 'px';
+    popup.style.top = Math.max(8, rect.top - 44) + 'px';
+    popup.classList.add('is-visible');
+  }
+
+  document.addEventListener('mouseup', function () {
+    setTimeout(showPopupNearSelection, 10);
+  });
+  document.addEventListener('scroll', hidePopup, true);
+  document.getElementById('btn-hl').addEventListener('click', saveHighlightFromSelection);
+  document.getElementById('btn-hl-clear-sel').addEventListener('click', function () {
+    // remove highlight if selection is inside a mark
+    const sel = window.getSelection();
+    if (!sel || !currentWorkId) return;
+    const node = sel.anchorNode && (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement);
+    const p = node && node.closest && node.closest('p.hl-selectable');
+    if (!p) return;
+    const map = loadJSON(storageKey(currentWorkId, 'hl'), {});
+    delete map[p.id];
+    saveJSON(storageKey(currentWorkId, 'hl'), map);
+    // restore plain text
+    p.textContent = p.textContent;
+    hidePopup();
+    flash('Marks cleared in paragraph');
+  });
+
+  document.getElementById('btn-bookmark').addEventListener('click', saveBookmark);
+  document.getElementById('btn-goto-bookmark').addEventListener('click', function () {
+    restoreBookmark(currentWorkId, false);
+  });
+  document.getElementById('btn-clear-hl').addEventListener('click', function () {
+    if (confirm('Clear all highlights in this work?')) clearHighlightsInWork();
+  });
+  document.getElementById('btn-side').addEventListener('click', function () {
+    document.getElementById('work-side').classList.toggle('open');
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+  window.addEventListener('hashchange', render);
+})();
+</script>
+</body>
+</html>

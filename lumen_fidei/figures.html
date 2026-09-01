@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figures &mdash; Lumen Fidei</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Directory + side profile panel */
+  .figures-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: calc(100vh - 70px);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    .figures-layout { grid-template-columns: 1fr; }
+    .figures-list-pane { max-height: 42vh; border-right: none; border-bottom: 1px solid var(--hairline); }
+  }
+
+  .figures-list-pane {
+    border-right: 1px solid var(--hairline);
+    background: var(--bg-deep);
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+  }
+  .list-controls {
+    padding: 1rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--hairline);
+    flex-shrink: 0;
+  }
+  .list-controls input[type="search"] {
+    width: 100%;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    color: var(--ink);
+    font-family: var(--serif-body);
+    font-size: 0.95rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 3px;
+    margin-bottom: 0.7rem;
+  }
+  .list-controls input:focus {
+    outline: 1px solid var(--gold);
+    border-color: var(--gold);
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .filter-chip {
+    border: 1px solid var(--hairline);
+    background: transparent;
+    color: var(--ink-dim);
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-family: var(--serif-body);
+    font-size: 0.78rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.2s ease;
+  }
+  .filter-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .filter-chip.active { color: var(--ink); border-color: currentColor; }
+  .filter-chip:hover { color: var(--ink); }
+
+  .figures-list {
+    overflow-y: auto;
+    flex: 1;
+    padding: 0.5rem 0;
+  }
+  .figure-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    color: var(--ink);
+    font-family: var(--serif-body);
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .figure-row:hover, .figure-row:focus-visible {
+    background: rgba(236,229,212,0.05);
+  }
+  .figure-row.active {
+    background: rgba(201,162,39,0.08);
+    border-left-color: var(--ring-color, var(--gold));
+  }
+  .figure-row .mini-portrait {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 2px solid var(--ring-color, var(--gold));
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-panel);
+    font-family: var(--serif-display);
+    font-size: 0.85rem;
+  }
+  .figure-row .mini-portrait img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .figure-row .row-text { min-width: 0; }
+  .figure-row .row-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .figure-row .row-meta {
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+  }
+
+  /* ——— Profile panel (right side) ——— */
+  .profile-pane {
+    padding: 2rem 2.5rem 3rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 70px);
+  }
+  @media (max-width: 900px) {
+    .profile-pane { max-height: none; padding: 1.5rem 1.2rem 3rem; }
+  }
+
+  .profile-empty {
+    color: var(--ink-dim);
+    text-align: center;
+    padding: 4rem 1rem;
+    font-style: italic;
+  }
+
+  .profile-card {
+    animation: panel-in 0.35s ease;
+  }
+  @keyframes panel-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .profile-top {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 1.8rem;
+    margin-bottom: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 600px) {
+    .profile-top { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  }
+
+  .profile-side-portrait {
+    width: 180px; height: 180px;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 2px solid var(--ring-color, var(--gold));
+    box-shadow: 0 0 36px rgba(0,0,0,0.4), 0 0 24px var(--ring-glow, transparent);
+    background: var(--bg-panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif-display);
+    font-size: 2.4rem;
+  }
+  .profile-side-portrait img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .profile-identity h1 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    margin: 0 0 0.35rem;
+  }
+  .profile-identity .dates {
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+  }
+  .profile-identity .epithet {
+    font-style: italic;
+    color: var(--ink-dim);
+    margin: 0.6rem 0 1rem;
+    font-size: 1.05rem;
+  }
+
+  .profile-section {
+    margin-bottom: 1.8rem;
+  }
+  .profile-section h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--hairline);
+    letter-spacing: 0.06em;
+  }
+  .profile-section p {
+    color: var(--ink-dim);
+    margin: 0 0 0.8rem;
+    line-height: 1.65;
+  }
+
+  .works-list, .sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .works-list li, .sources-list li {
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed var(--hairline);
+    color: var(--ink-dim);
+    font-size: 0.95rem;
+  }
+  .works-list li:last-child, .sources-list li:last-child {
+    border-bottom: none;
+  }
+  .works-list li::before {
+    content: '† ';
+    color: var(--ring-color, var(--gold));
+    font-size: 0.8rem;
+  }
+  .works-list a {
+    color: var(--ink);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .works-list a:hover, .works-list a:focus-visible {
+    color: var(--gold-glow);
+    border-bottom-color: var(--gold);
+  }
+
+
+  .full-profile-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+  }
+
+  .list-count {
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    padding: 0.5rem 1rem 0.8rem;
+    border-top: 1px solid var(--hairline);
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="index.html" class="wordmark">LUMEN&nbsp;FIDEI</a>
+  <nav>
+    <a href="figures.html">Figures</a>
+    <a href="concepts.html">Concepts</a>
+    <a href="theological-tree.html">Theological Tree</a>
+    <a href="texts/bible.html">Sacred Texts</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="figures-layout">
+
+  <!-- LEFT: searchable, filterable list -->
+  <aside class="figures-list-pane">
+    <div class="list-controls">
+      <input type="search" id="search-input" placeholder="Search by name…" aria-label="Search figures">
+      <div class="filter-row" id="filter-chips"></div>
+    </div>
+    <div class="figures-list" id="figures-list" role="listbox" aria-label="Theologians and Church Fathers"></div>
+    <div class="list-count" id="list-count"></div>
+  </aside>
+
+  <!-- RIGHT: profile card -->
+  <main class="profile-pane" id="profile-pane">
+    <div class="profile-empty">Select a name from the list to view their profile, works, and sources.</div>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <p>Directory of Church Fathers, saints, and theologians across the Catholic, Orthodox, and Protestant traditions. Portraits from public-domain sources only. <a href="about.html">Sourcing policy</a></p>
+</footer>
+
+<script src="js/figures.js"></script>
+<script>
+(function () {
+  let activeFilters = new Set(Object.keys(TRADITION_COLORS));
+  let selectedId = null;
+
+  const listEl = document.getElementById('figures-list');
+  const profileEl = document.getElementById('profile-pane');
+  const searchEl = document.getElementById('search-input');
+  const chipsEl = document.getElementById('filter-chips');
+  const countEl = document.getElementById('list-count');
+
+  // Build tradition filter chips
+  Object.entries(TRADITION_COLORS).forEach(function ([key, t]) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'filter-chip active';
+    chip.innerHTML = '<span class="dot" style="background:' + t.color + '"></span>' + t.name.split(' ')[0];
+    chip.title = t.name;
+    chip.addEventListener('click', function () {
+      if (activeFilters.has(key)) {
+        activeFilters.delete(key);
+        chip.classList.remove('active');
+      } else {
+        activeFilters.add(key);
+        chip.classList.add('active');
+      }
+      renderList();
+    });
+    chipsEl.appendChild(chip);
+  });
+
+  function filteredFigures() {
+    const q = (searchEl.value || '').trim().toLowerCase();
+    return FIGURES
+      .filter(function (f) { return activeFilters.has(f.tradition); })
+      .filter(function (f) {
+        if (!q) return true;
+        return f.name.toLowerCase().indexOf(q) !== -1 ||
+               (f.epithet && f.epithet.toLowerCase().indexOf(q) !== -1);
+      })
+      .sort(function (a, b) {
+        // rough chronological by first number in dates
+        const ya = parseInt(String(a.dates).replace(/^[^\d]*/, ''), 10) || 0;
+        const yb = parseInt(String(b.dates).replace(/^[^\d]*/, ''), 10) || 0;
+        return ya - yb;
+      });
+  }
+
+  function renderList() {
+    const items = filteredFigures();
+    listEl.innerHTML = '';
+    items.forEach(function (fig) {
+      const t = TRADITION_COLORS[fig.tradition];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'figure-row' + (fig.id === selectedId ? ' active' : '');
+      btn.style.setProperty('--ring-color', t.color);
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', fig.id === selectedId ? 'true' : 'false');
+      btn.innerHTML =
+        '<div class="mini-portrait">' + portraitHTML(fig) + '</div>' +
+        '<div class="row-text">' +
+          '<div class="row-name">' + fig.name + '</div>' +
+          '<div class="row-meta">' + fig.dates + '</div>' +
+        '</div>';
+      btn.addEventListener('click', function () {
+        selectedId = fig.id;
+        renderList();
+        renderProfile(fig);
+      });
+      listEl.appendChild(btn);
+    });
+    countEl.textContent = items.length + ' figure' + (items.length === 1 ? '' : 's');
+  }
+
+  function renderProfile(fig) {
+    const t = TRADITION_COLORS[fig.tradition];
+    const worksHtml = (fig.works || []).map(function (w) {
+      if (typeof w === 'string') return '<li>' + w + '</li>';
+      const title = w.title || '';
+      const url = w.url || '';
+      if (url) {
+        return '<li><a href="' + url + '" target="_blank" rel="noopener">' + title + '</a></li>';
+      }
+      return '<li>' + title + '</li>';
+    }).join('');
+
+    const fullLink = '<p style="margin-top:1.2rem"><a class="btn btn-primary full-profile-link" href="figures/profile.html?id=' + encodeURIComponent(fig.id) + '">Open full profile page</a></p>';
+
+    profileEl.innerHTML =
+      '<article class="profile-card" style="--ring-color:' + t.color + '; --ring-glow:' + t.glow + '">' +
+        '<div class="profile-top">' +
+          '<div class="profile-side-portrait">' + portraitHTML(fig) + '</div>' +
+          '<div class="profile-identity">' +
+            '<span class="tag-pill" style="border-color:' + t.color + '; color:' + t.color + '">' + t.name + '</span>' +
+            '<h1>' + fig.name + '</h1>' +
+            '<div class="dates">' + fig.dates + '</div>' +
+            '<p class="epithet">' + (fig.epithet || '') + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<div class="profile-section">' +
+          '<h2>Works</h2>' +
+          '<ul class="works-list">' + (worksHtml || '<li>Works list forthcoming.</li>') + '</ul>' +
+          '<p style="margin-top:1rem;font-size:0.85rem;color:var(--ink-dim)">Works marked with a link open the full public-domain text <strong>on this site</strong>. More works are being loaded into the in-site library from verified public-domain sources (Catholic Library, CCEL, Ante-Nicene/Nicene Fathers series).</p>' +
+          fullLink +
+        '</div>' +
+      '</article>';
+  }
+
+  searchEl.addEventListener('input', renderList);
+
+  // Initial render — select first figure so the panel is never empty
+  renderList();
+  if (FIGURES.length) {
+    selectedId = FIGURES[0].id;
+    renderList();
+    renderProfile(FIGURES[0]);
+  }
+})();
+</script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

@@ -1,0 +1,755 @@
+/* Concept exhibit — encyclopedia / museum layout (Grace model) */
+
+.concept-exhibit-body {
+  background: var(--bg-deep);
+}
+
+.exhibit-progress {
+  position: sticky;
+  top: 64px;
+  z-index: 40;
+  background: rgba(5, 6, 10, 0.94);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0.5rem 0;
+}
+
+.exhibit-progress-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 1.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.15rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--serif-display);
+}
+
+.exhibit-progress a {
+  color: var(--ink-dim);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.exhibit-progress a:hover,
+.exhibit-progress a.is-active {
+  color: var(--gold-glow);
+  opacity: 1;
+}
+
+/* ── Hero ─────────────────────────────────────────── */
+.exhibit-hero {
+  padding: 3.25rem 1.75rem 2.85rem;
+  border-bottom: 1px solid var(--hairline);
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -8%, rgba(201, 162, 39, 0.07), transparent 58%),
+    var(--bg-deep);
+}
+
+.exhibit-hero-inner {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.exhibit-back {
+  display: inline-block;
+  margin-bottom: 1.35rem;
+  color: var(--ink-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.exhibit-back:hover {
+  color: var(--gold-glow);
+}
+
+.exhibit-eyebrow {
+  display: block;
+  font-family: var(--serif-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold-glow);
+  margin-bottom: 0.9rem;
+}
+
+.exhibit-hero h1 {
+  margin: 0;
+  font-size: clamp(2.75rem, 7.5vw, 4.5rem);
+  letter-spacing: 0.1em;
+  line-height: 1.02;
+  font-weight: 400;
+}
+
+.exhibit-question {
+  margin: 1.25rem 0 0;
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  line-height: 1.4;
+  color: var(--gold-glow);
+  font-style: italic;
+  max-width: 34em;
+  font-weight: 400;
+}
+
+.exhibit-definition {
+  margin: 1.5rem 0 0;
+  font-size: 1.12rem;
+  line-height: 1.6;
+  color: var(--ink);
+  max-width: 38em;
+  border-left: 2px solid rgba(201, 162, 39, 0.4);
+  padding-left: 1.2rem;
+}
+
+.exhibit-lead {
+  margin: 1.2rem 0 0;
+  color: var(--ink-dim);
+  max-width: 40em;
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+/* ── Shared section chrome ────────────────────────── */
+.exhibit-section {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 3.75rem 1.75rem;
+  border-bottom: 1px solid var(--hairline);
+  scroll-margin-top: 130px;
+}
+
+.exhibit-section h2 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  letter-spacing: 0.12em;
+  color: var(--gold-glow);
+  font-weight: 400;
+}
+
+.exhibit-kicker {
+  display: block;
+  font-family: var(--serif-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 0.55rem;
+}
+
+/* ── The Question ─────────────────────────────────── */
+.exhibit-question-block {
+  background: var(--bg-panel);
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  padding: 2.25rem 2rem 2rem;
+}
+
+.exhibit-question-quote {
+  margin: 0;
+  font-size: clamp(1.4rem, 3.2vw, 1.95rem);
+  line-height: 1.35;
+  color: var(--ink);
+  font-style: italic;
+  max-width: 20em;
+  font-weight: 400;
+}
+
+.exhibit-question-note {
+  margin: 1.35rem 0 1.5rem;
+  color: var(--ink-dim);
+  max-width: 42em;
+  line-height: 1.6;
+  font-size: 1.02rem;
+}
+
+.exhibit-q-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.exhibit-q-list li {
+  border: 1px solid var(--hairline);
+  background: rgba(5, 6, 10, 0.4);
+  padding: 1rem 1.15rem;
+  border-radius: 3px;
+  color: var(--ink);
+  font-size: 1.04rem;
+  line-height: 1.45;
+  transition: border-color 0.25s, background 0.25s;
+  cursor: default;
+}
+
+.exhibit-q-list li:hover {
+  border-color: rgba(201, 162, 39, 0.38);
+  background: rgba(201, 162, 39, 0.05);
+}
+
+/* ── At a Glance table ────────────────────────────── */
+.glance-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+}
+
+.glance-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.94rem;
+}
+
+.glance-table th,
+.glance-table td {
+  border: 1px solid var(--hairline);
+  padding: 1rem 1.05rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.glance-table thead th {
+  background: rgba(12, 14, 20, 0.98);
+  font-family: var(--serif-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-glow);
+  position: sticky;
+  top: 0;
+  font-weight: 400;
+}
+
+.glance-table th.row-label {
+  font-family: var(--serif-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  background: rgba(5, 6, 10, 0.45);
+  width: 11.5rem;
+  font-weight: 400;
+}
+
+.glance-table tbody tr:hover td {
+  background: rgba(201, 162, 39, 0.035);
+}
+
+.glance-cell-text {
+  margin: 0 0 0.6rem;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.glance-link {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: var(--gold-glow);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.glance-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.th-catholic {
+  box-shadow: inset 0 3px 0 var(--gold);
+}
+.th-orthodox {
+  box-shadow: inset 0 3px 0 var(--purple);
+}
+.th-lutheran {
+  box-shadow: inset 0 3px 0 #8a6c1c;
+}
+.th-reformed {
+  box-shadow: inset 0 3px 0 var(--blue);
+}
+
+/* ── Tradition full-width sections ────────────────── */
+.tradition-block {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 4rem 1.75rem;
+  border-bottom: 1px solid var(--hairline);
+  scroll-margin-top: 130px;
+}
+
+.tradition-block-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.4rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.tradition-block-header .trad-name {
+  font-family: var(--serif-display);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.tradition-block.trad-catholic .trad-name {
+  color: var(--gold-glow);
+}
+.tradition-block.trad-orthodox .trad-name {
+  color: var(--purple-glow);
+}
+.tradition-block.trad-lutheran .trad-name {
+  color: #e6c56a;
+}
+.tradition-block.trad-reformed .trad-name {
+  color: var(--blue-glow);
+}
+
+.tradition-block-header h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 3.5vw, 2.2rem);
+  letter-spacing: 0.04em;
+  max-width: 24em;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.tradition-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2.5rem 3rem;
+}
+
+@media (max-width: 860px) {
+  .tradition-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tradition-sub h3 {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  color: var(--gold-glow);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-family: var(--serif-display);
+}
+
+.tradition-sub p {
+  margin: 0 0 1.15rem;
+  color: var(--ink-dim);
+  line-height: 1.7;
+  font-size: 1.02rem;
+}
+
+.tradition-sub p:last-child {
+  margin-bottom: 0;
+}
+
+.tradition-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.tradition-panel {
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  padding: 1.25rem 1.3rem;
+  background: var(--bg-panel);
+}
+
+.tradition-panel h3 {
+  margin: 0 0 0.65rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  font-weight: 400;
+  font-family: var(--serif-display);
+}
+
+.tradition-panel p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+.key-figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.key-figures a,
+.key-figures span {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.key-figures a:hover {
+  border-color: rgba(201, 162, 39, 0.5);
+  color: var(--gold-glow);
+}
+
+/* ── Where they agree ─────────────────────────────── */
+.agree-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.agree-item {
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  padding: 1.15rem 1.25rem;
+  background: rgba(201, 162, 39, 0.04);
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+}
+
+.agree-mark {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 8px rgba(201, 162, 39, 0.3);
+}
+
+.agree-item p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.5;
+  font-size: 0.98rem;
+}
+
+/* ── Where they clash ─────────────────────────────── */
+.clash-item {
+  margin: 0 0 2.25rem;
+  padding: 1.75rem 1.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  background: var(--bg-panel);
+}
+
+.clash-item:last-child {
+  margin-bottom: 0;
+}
+
+.clash-item h3 {
+  margin: 0 0 1.2rem;
+  font-size: 1.08rem;
+  letter-spacing: 0.06em;
+  color: var(--gold-glow);
+  font-weight: 400;
+}
+
+.clash-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+@media (max-width: 720px) {
+  .clash-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.clash-cell {
+  border-left: 2px solid var(--hairline);
+  padding-left: 1rem;
+}
+
+.clash-cell .c-label {
+  display: block;
+  font-family: var(--serif-display);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 0.35rem;
+}
+
+.clash-cell p {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.clash-flow {
+  margin-top: 1.15rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--serif-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--gold-glow);
+}
+
+/* ── Timeline ─────────────────────────────────────── */
+.timeline {
+  position: relative;
+  margin: 1.75rem 0 0;
+  padding-left: 1.4rem;
+  border-left: 1px solid rgba(201, 162, 39, 0.32);
+}
+
+.timeline-node {
+  position: relative;
+  padding: 0 0 2rem 1.4rem;
+}
+
+.timeline-node:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-node::before {
+  content: "";
+  position: absolute;
+  left: -1.5rem;
+  top: 0.4rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--bg-deep);
+  box-shadow: 0 0 0 1px rgba(201, 162, 39, 0.45);
+}
+
+.timeline-date {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-glow);
+}
+
+.timeline-title {
+  margin: 0.3rem 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+.timeline-title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.timeline-title a:hover {
+  color: var(--gold-glow);
+}
+
+.timeline-sig {
+  margin: 0;
+  color: var(--ink-dim);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  max-width: 42em;
+}
+
+.timeline-node details {
+  margin-top: 0.55rem;
+}
+
+.timeline-node summary {
+  cursor: pointer;
+  color: var(--gold-glow);
+  font-size: 0.88rem;
+  list-style: none;
+  letter-spacing: 0.02em;
+}
+
+.timeline-node summary::-webkit-details-marker {
+  display: none;
+}
+
+.timeline-extra {
+  margin: 0.55rem 0 0;
+  color: var(--ink-dim);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  max-width: 44em;
+}
+
+/* ── Primary sources ──────────────────────────────── */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1.1rem;
+}
+
+.source-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  padding: 1.3rem 1.35rem;
+  background: var(--bg-panel);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.25s, transform 0.25s;
+  min-height: 9.5rem;
+}
+
+.source-card:hover {
+  border-color: rgba(201, 162, 39, 0.42);
+  transform: translateY(-2px);
+}
+
+.source-card .src-author {
+  font-family: var(--serif-display);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-glow);
+}
+
+.source-card .src-title {
+  margin: 0.5rem 0 0.55rem;
+  font-size: 1.08rem;
+  line-height: 1.3;
+  color: var(--ink);
+  font-weight: 400;
+}
+
+.source-card .src-meta {
+  margin-top: auto;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.source-card .src-ext {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.66rem;
+  color: var(--gold-dim, var(--ink-dim));
+}
+
+/* ── Follow the thread ────────────────────────────── */
+.thread {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.4rem;
+  margin-bottom: 1.75rem;
+}
+
+.thread a,
+.thread span.node {
+  display: inline-block;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--hairline);
+  border-radius: 3px;
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 0.95rem;
+  background: var(--bg-panel);
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.thread a:hover {
+  border-color: rgba(201, 162, 39, 0.5);
+  color: var(--gold-glow);
+}
+
+.thread span.node.is-current {
+  border-color: rgba(201, 162, 39, 0.55);
+  color: var(--gold-glow);
+  box-shadow: inset 0 0 0 1px rgba(201, 162, 39, 0.18);
+}
+
+.thread .arrow {
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  padding: 0 0.1rem;
+}
+
+.related-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.related-chips a {
+  display: inline-block;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--hairline);
+  text-decoration: none;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.related-chips a:hover {
+  color: var(--gold-glow);
+  border-color: rgba(201, 162, 39, 0.4);
+}
+
+.exhibit-footnote {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.25rem 1.75rem 4.5rem;
+  color: var(--ink-dim);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* Hide old fallback when exhibit is active */
+body.has-exhibit #concept-hero-fallback {
+  display: none !important;
+}
+
+body.has-exhibit #concept-entry.concept-entry {
+  padding: 0;
+  max-width: none;
+}
+
+body.has-exhibit #concept-entry .concept-entry-inner {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .source-card:hover {
+    transform: none;
+  }
+}
+
+/* Mobile: stack traditions, keep table scrollable */
+@media (max-width: 640px) {
+  .exhibit-hero {
+    padding: 2.5rem 1.25rem 2.25rem;
+  }
+  .exhibit-section,
+  .tradition-block {
+    padding: 2.75rem 1.25rem;
+  }
+  .exhibit-question-block {
+    padding: 1.5rem 1.2rem;
+  }
+  .clash-item {
+    padding: 1.35rem 1.15rem;
+  }
+}
